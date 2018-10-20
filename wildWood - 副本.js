@@ -106,7 +106,7 @@ function WildWood(ww) {
             if (v) {
                 elvar = { tp: 'bind:value', el: el, var: v, forElVar: forElVar, data: data };
                 lstElVar.push(elvar);
-            } 
+            }
             v = el.getAttribute('v-bind:style');
             if (v) {
                 elvar = { tp: 'bind:style', el: el, var: v, forElVar: forElVar,data: data};
@@ -124,12 +124,7 @@ function WildWood(ww) {
                 modelVar = v; 
                 elvar = { tp: 'model', el: el, var: v, forElVar: forElVar, data: data }; 
                 lstElVar.push(elvar);
-            } 
-            v = el.getAttribute('v-html');
-            if (v) {
-                elvar = { tp: 'html', el: el, var: v, forElVar: forElVar, data: data };
-                lstElVar.push(elvar);
-            } 
+            }
             v = el.getAttribute('v-on:change');
             var md = null;
             if (v) {
@@ -218,9 +213,6 @@ function WildWood(ww) {
             else if (ev.tp === 'innerText' && ev.innerText.indexOf(varName) >= 0) { 
                 ev.el.innerText =  ev.innerText.fillVars(dataObj, objName);
             }
-            else if (ev.tp === 'html' && ev.var === varName) {
-                ev.el.innerHTML = pv;
-            } 
             else if (ev.tp === 'if' && ev.var.indexOf(varName)>=0) {
                 var bShow = evil("with(varObj){return " + ev.var + "}", 'varObj', ww.data, objName, dataObj); 
                 if (bShow) ev.el.style.display = ev.origDisplay;

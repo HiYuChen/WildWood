@@ -4,6 +4,42 @@ Other similar component usually replace the whole dom object when loading. So th
 
 Following is a simple demo for sale. It calculate the cash amount by total amount and coupon amount
 
+for exmaple. The data defined is 
+ var WildWood = new WildWood({
+  el: '#app',
+  data{ 
+     name:'john',
+ 	 score:100,
+	 gender:'man',
+	 html:'<div>hello</div>',
+	 subjects:[
+	 	 {name:'english',teacher:'jack'},
+		 {name:'math',teacher:'tom'}, 
+	 ],
+	 },
+     methods:{
+	 	 scoreChanged:function(){
+		 
+		 }
+	 },
+    watch:{
+	     
+	 },
+    computed:{
+	 
+	 }
+ }
+ In html, you can use following syntax
+{{name}}   -- should be used inside a html element which has no children
+v-html="html"   ---innerHTML will be replaced
+v-model="score"   
+v-bind:value="score"  
+v-bind:style="{background-color:gender=='man'? '#0f0':'#00f'"  
+v-bind:class="{classA:gender=='man',classB:gender=='woman'}"  
+v-if="gender=='man'"  
+v-for="for subject in subjects" 
+v-on:change="scoreChanged()"  
+
 # html:
  ```html
               <div> 
@@ -37,7 +73,6 @@ Following is a simple demo for sale. It calculate the cash amount by total amoun
 					       <div style="display:flex">
                                 <input type="radio" name="radio_coupon" style="" v-on:change ="couponClicked();" v-bind:value="row.coupon_id" v-model="m_couponToUse" /> 
                                 <img  v-bind:style="{visibility:row.isChecked?'visible':'hidden'}" style="width:32px;height:32px;" src="check.svg"/> 
-                                 
                                   <div>
                                       {{row.value}}元
                                   </div>
@@ -92,8 +127,5 @@ Following is a simple demo for sale. It calculate the cash amount by total amoun
             }
         });  
 ```
-	
- 
-	
-	
+	 
 	For complete demo, please look at the demo html file
