@@ -1,8 +1,9 @@
 someone may ask: so many successful products is there, vue and angular is perfect. why make this one?
-it is simple, it is smaller, and it is faster. So it is here.
+# it is simple, it is smaller, and it is faster. So it is here.
 Other similar component usually replace the whole dom object when loading. So they will remove the event handlers and user defined variables on doms. So they may have problems with some UI components. The templete synax is almost same as vue.
 
 Following is a simple demo for sale. It calculate the cash amount by total amount and coupon amount
+
 html:
  
               <div> 
@@ -46,9 +47,8 @@ html:
                        </li>
                   </ul>
 			</div>
-
-js:
-<script>
+            
+```javascript
  var WildWood = new WildWood({
             el: '#app',
             data: { 
@@ -88,7 +88,9 @@ js:
                 }
             }
         });  
-	<script>
+```
+	
+ 
 	
 	
 	For complete demo, please look at the demo html file
