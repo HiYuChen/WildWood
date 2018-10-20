@@ -48,7 +48,7 @@ html:
 			</div>
 
 js:
-
+<script>
  var WildWood = new WildWood({
             el: '#app',
             data: { 
@@ -88,5 +88,7 @@ js:
                 }
             }
         });  
-		
+	<script>
+	
+	
 	For complete demo, please look at the demo html file
