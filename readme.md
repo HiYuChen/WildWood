@@ -4,8 +4,8 @@ Other similar component usually replace the whole dom object when loading. So th
 
 Following is a simple demo for sale. It calculate the cash amount by total amount and coupon amount
 
-html:
- 
+# html:
+ ```html
               <div> 
                      <div style="display:flex;">
                             <div>Total:</div>
@@ -47,7 +47,10 @@ html:
                        </li>
                   </ul>
 			</div>
-            
+```
+
+# js code:
+
 ```javascript
  var WildWood = new WildWood({
             el: '#app',
