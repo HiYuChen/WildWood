@@ -420,7 +420,7 @@ function WildWood(ww) {
             var OAM = ['push', 'pop', 'splice'];//['push', 'pop', 'shift', 'unshift', 'short', 'reverse', 'splice']  
             OAM.forEach((method) => {
                 Object.defineProperty(overrideProto, method, {
-                    value: function () { 
+                    value: function () {  
                         if (method === 'push') {
                             updateListByVar(dataObj,arrName, method, arguments[0]);
                         }
