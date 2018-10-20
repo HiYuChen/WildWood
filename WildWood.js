@@ -32,7 +32,7 @@ function WildWood(ww) {
             parent.insertBefore(newEle, targetEle.nextSibling);
         }
     } 
-    String.prototype.fillVars = function (dataObj, objName) {
+    /*String.prototype.fillVars = function (dataObj, objName) {
         var result = this; var reg;
         for (var key in dataObj) {
             if (dataObj[key] !== undefined) {
@@ -45,6 +45,26 @@ function WildWood(ww) {
             }
         }
         return result;
+    }*/
+    String.prototype.fillVars = function (dataObj, objName) { 
+        var n = 0,n1=0,n_pre=0; var arrVars = [];
+        var res = '';
+        while (n >= 0 && n1 >= 0 && n_pre <= this.length - 1) {
+            n = this.indexOf('{{', n_pre);
+            if (n >= 0) {
+                res += this.substring(n_pre, n);
+                n1 = this.indexOf('}}', n + 1);
+                if (n1 > n) {
+                    var vn = this.substring(n + 2, n1);
+                    var vv = evil("with(varObj){return " + vn + "}", 'varObj', ww.data, objName, dataObj);
+                    res += vv; 
+                    n_pre = n1+2;
+                } 
+            } else {
+                res += this.substring(n_pre, this.length); 
+            } 
+        } 
+        return res;
     }
     function createNode(htmlStr) {
         var div = document.createElement("div");
@@ -79,7 +99,7 @@ function WildWood(ww) {
             var elvar = null;
             v = el.getAttribute('v-if');
             if (v) {
-                elvar = { tp: 'if', el: el, var: v, forElVar: forElVar,data:data};
+                elvar = { tp: 'if', el: el, var: v, forElVar: forElVar, data: data, origDisplay: el.style.display};
                 lstElVar.push(elvar);
             }
             v = el.getAttribute('v-bind:value');
@@ -135,6 +155,9 @@ function WildWood(ww) {
             }
             
         }
+       // if (el.innerText && el.innerHTML.indexOf('<') === -1 && el.innerText.indexOf('{{') >= 0) {
+           // debugger;
+       // }
         if (!el.children || el.children.length === 0) {
             if (!el.children) {
                 var iiii = 1;
@@ -187,11 +210,12 @@ function WildWood(ww) {
             else if (ev.tp === 'bind:value' && ev.var === varName) {
                   ev.el.value = pv;
             }
-            else if (ev.tp === 'innerText' && ev.innerText.indexOf(varName) >= 0) {
-                ev.el.innerText = ev.innerText.fillVars(dataObj, objName);
+            else if (ev.tp === 'innerText' && ev.innerText.indexOf(varName) >= 0) { 
+                ev.el.innerText =  ev.innerText.fillVars(dataObj, objName);
             }
-            else if (ev.tp === 'if' && ev.var === varName) {
-                if (pv) ev.el.style.display = "";
+            else if (ev.tp === 'if' && ev.var.indexOf(varName)>=0) {
+                var bShow = evil("with(varObj){return " + ev.var + "}", 'varObj', ww.data, objName, dataObj); 
+                if (bShow) ev.el.style.display = ev.origDisplay;
                 else ev.el.style.display = "none";
             }
             else if (ev.tp === 'bind:style') {
