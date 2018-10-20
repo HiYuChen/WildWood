@@ -24,6 +24,14 @@ function findNodes(el, slt) {
 */
 function WildWood(ww) {
     this.ww = ww;  
+    function insertAfter(newEle, targetEle) { 
+        var parent = targetEle.parentNode; 
+        if (parent.lastChild == targetEle) {   
+            parent.appendChild(newEle);
+        } else {   
+            parent.insertBefore(newEle, targetEle.nextSibling);
+        }
+    } 
     String.prototype.fillVars = function (dataObj, objName) {
         var result = this; var reg;
         for (var key in dataObj) {
@@ -232,14 +240,15 @@ function WildWood(ww) {
                     var forHtml = '';
                     //ev.mumEl.innerHTML = "";  
                     for (var k in arr) {
-                        var row = arr[k];
-                        //var m = ev.outerHTML.replace(new RegExp(ev.forVar + '.', 'g'), '');
+                        var row = arr[k]; 
                         var m = ev.outerHTML;
                         m = m.fillVars(row, ev.forVar);
                         m = m.fillVars(ww.data);
-                        //forHtml += m;
+                        
                         m = createNode(m);
-                        ev.lastEl.after(m);
+                        //ev.lastEl.after(m);
+                        insertAfter(m, ev.lastEl);
+
                         bindElVars(m, row, g_lstElVar, ev);
                         ev.lastEl = m;
                         observeArray(dataObj, arr, pn, row);
@@ -261,7 +270,8 @@ function WildWood(ww) {
                     m = m.fillVars(row);
                     m = createNode(m);
                   
-                    ev.lastEl.after(m);
+                    //ev.lastEl.after(m);
+                    insertAfter(m, ev.lastEl);
                     bindElVars(m, row, g_lstElVar, ev);
                     ev.lastEl = m;  
                     observeArray(dataObj, arr, arrName, row);

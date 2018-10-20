@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html>
+<head> 
+    <meta name ="viewport" content ="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no,viewport-fit=cover">
+    
+    <title>demo</title>
+    <link rel="stylesheet" href="f7/framework7.min.css">   
+    <script src="f7/framework7.min.js"></script>  
+
+    <script src="WildWood.js"></script> 
+    <script src="demo.js"></script> 
+
+</head>
+<body>
+   <div id="app1">  
+    <div class="view view-main">  
+      <div id="Demo" class="page">    
+         <div class="page-content infinite-scroll-content" style="height:calc(100% - 56px - 14px);"> 
+             <div class="list inline-labels no-hairlines-md"> 
+                  <ul>
+                       <li class="item-content item-input"> 
+                                  <div class="item-inner">
+                                    <div class="item-title item-label">Total</div>
+                                    <div class="item-input-wrap">
+                                      <input type="text" placeholder="Please input" id="couponMinSale" v-model="m_totalAmount">
+                                      <span class="input-clear-button"></span>
+                                    </div> 
+                                  </div>
+                         </li>
+                        <li class="item-content item-input labelStyle"> 
+                                  <div class="item-inner" >
+                                    <div class="item-title item-label" >Coupon</div>
+                                    <div class="item-input-wrap">
+                                      <label>{{m_couponAmount}} </label>  
+                                      <span class="input-clear-button"></span>
+                                    </div> 
+                                  </div>
+                         </li>
+                        <li class="item-content item-input labelStyle"> 
+                                  <div class="item-inner">
+                                    <div class="item-title item-label">Cash</div>
+                                    <div class="item-input-wrap">
+                                      <label>{{getAmount}}</label>
+                                      <span class="input-clear-button"></span>
+                                    </div> 
+                                  </div>
+                         </li>
+                   </ul>
+               </div>
+    
+              
+              <!--<div class="inputItem" v-on:click="couponClicked()">
+                    <div style="line-height:21px;"><label>实收</label></div>
+                    <div><label>{{getAmount}}</label></div>
+              </div>-->
+              <div style="color:#333;margin-top:10px;margin-left:10px;">Please select a coupon</div> 
+              <div>Selected coupon id is: {{m_couponToUse}}</div>
+
+              <div class="list"> 
+                  <ul>
+                       <li v-for="row in m_rows" >
+                           <label class="item-radio item-content labelStyle" >
+                                <input type="radio" name="radio_coupon" style="" v-on:change ="couponClicked();" v-bind:value="row.coupon_id" v-model="m_couponToUse" /> 
+                                <img  v-bind:style="{visibility:row.isChecked?'visible':'hidden'}" style="width:32px;height:32px;" src="check.svg"/> 
+                                <div class="item-inner">
+                                  <div>
+                                      {{row.value}}元
+                                  </div>
+                                  <div></div>
+                                  <div class="item-title">{{row.goods_name}}</div>
+                                </div> 
+                          </label>
+                       </li>
+
+                  </ul>
+              </div>
+              <div class="preloader infinite-scroll-preloader">
+              </div> 
+          </div>
+           
+        <div class="toolbar toolbar-bottom-md">
+            <div class="toolbar-inner">
+                <a class="link" ><i class="icon icon-back"></i><span class="ios-only">Back</span></a>
+                <a class="link" v-bind:style="{'pointer-events': m_bSold ? 'none' : 'auto', color: m_bSold ? '#888' : ''}"  style="margin-right:10px;" href="javascript:me.btnSell_clicked();">Submit</a> 
+            </div>
+        </div>   
+   </div>
+   </div>
+  </div> 
+   <script>   
+        window.app = new Framework7({ root: '#app1'});
+        var mainView = window.app.views.create('.view-main'); 
+        if (me.onPageLoad) me.onPageLoad();  
+    </script>
+</body>
+</html>
