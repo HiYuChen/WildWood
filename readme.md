@@ -40,9 +40,13 @@ v-model="score"
 v-bind:value="score"  
 v-bind:style="{background-color:gender=='man'? '#0f0':'#00f'"  
 v-bind:class="{classA:gender=='man',classB:gender=='woman'}"  
+v-bind:src=""
+v-bind:any other attributes
 v-if="gender=='man'"  
 v-for="for subject in subjects" 
-v-on:change="scoreChanged()"  
+v-on:change="scoreChanged(row)" 
+v-on:click="rowClicked(row)" ;
+v-on:any other event
 ```
 
 #Limitation
