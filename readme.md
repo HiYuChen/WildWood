@@ -45,6 +45,38 @@ v-for="for subject in subjects"
 v-on:change="scoreChanged()"  
 ```
 
+#Limitation
+
+ 1. {{}} should be used in the innerText on a html element. It is better has no child
+    
+      <div>
+	      {{a}} <span>{{b}}</span> 
+	  </div> might work, it is not efficient. 
+	  <div>
+	      <span>{{a}}</span> <span>{{b}}</span> 
+	  </div>  is better
+ 2. in a multi "for in " block. you can only use the current for variable and the variables in data{}
+
+ such as 
+   data{
+       school:"Kaiwei",
+   	   students:[]
+	   	   {name:"kate",
+		     subjects:[{name:"chinese"},{name:"english"}]
+		   },{name:"tom",
+		      subjects:[{name:"chinese"},{name:"english"}]
+		   }
+	   }
+   }
+   <li v-for="for student in students">
+          ....
+	 <li  v-for="for subject in student.subjects">
+	        <div>{{student.name}}</div> <!--not allowed -->
+			 <div>{{subject.name}}</div> <!-- OK -->
+			 <div>{{school}}</div> <!--OK-->
+	 </li>
+
+
 Following is a complete demo:
 
 # html:

@@ -79,7 +79,7 @@ function WildWood(ww) {
     var g_lstElVar = new Array();
     var forElVar = null;
     //bind elements to wildwood 
-    function bindElVars(el, data, lstElVar, tmpFor) { 
+    function bindElVars1(el, data, lstElVar, tmpFor) { 
         if (tmpFor) {
             forElVar = tmpFor.mumFor;
         }
@@ -107,6 +107,12 @@ function WildWood(ww) {
                 elvar = { tp: 'bind:value', el: el, var: v, forElVar: forElVar, data: data };
                 lstElVar.push(elvar);
             } 
+            v = el.getAttribute('v-bind:src');
+            if (v) {
+                elvar = { tp: 'bind:src', el: el, var: v, forElVar: forElVar, data: data };
+                lstElVar.push(elvar);
+            } 
+            
             v = el.getAttribute('v-bind:style');
             if (v) {
                 elvar = { tp: 'bind:style', el: el, var: v, forElVar: forElVar,data: data};
@@ -183,7 +189,128 @@ function WildWood(ww) {
             forElVar = forElVar.mumFor;
         }
     }
-    bindElVars(ww.el,ww.data, g_lstElVar,null);
+    function bindElVars(el, data, lstElVar, tmpFor) {
+        if (tmpFor) {
+            forElVar = tmpFor.mumFor;
+        }
+        var bCurrentIsFor = false;
+        if (el.attributes) {
+            var modelVar = null; var md = null;
+           // el.attributes.forEach(function (v, k) {
+            for (k in el.attributes) {
+                v = el.attributes[k]; 
+                var attr = el.attributes[k];
+                var v = attr.value; var n = attr.name; 
+                if (!n || !v) continue;
+                var elvar = null; 
+                if (n === 'v-for') {
+                    var arr = v.split(' in ');
+                    if (arr.length === 2) {
+                        bInFor = true; bCurrentIsFor = true;
+                        forElVar = { tp: 'for', el: el, forVar: arr[0], inVar: arr[1], outerHTML: el.outerHTML, mumFor: forElVar, tmpFor: tmpFor, lastEl: el };
+                        if (!tmpFor) el.style.display = "none";
+                        forElVar.data = data;
+                        lstElVar.push(forElVar);
+                    }
+                }
+                else if (n === 'v-if') {
+                    elvar = { tp: 'if', el: el, var: v, forElVar: forElVar, data: data, origDisplay: el.style.display };
+                    lstElVar.push(elvar); 
+                } 
+                else if (n === 'v-model') {
+                    modelVar = v;
+                    elvar = { tp: 'model', el: el, var: v, forElVar: forElVar, data: data };
+                    lstElVar.push(elvar);
+                } 
+                else if (n === 'v-html') {
+                    elvar = { tp: 'html', el: el, var: v, forElVar: forElVar, data: data };
+                    lstElVar.push(elvar);
+                } 
+                else if (n === 'v-bind:value' || n === ':value') {
+                    elvar = { tp: 'bind:value', el: el, var: v, forElVar: forElVar, data: data };
+                    lstElVar.push(elvar);
+                }
+                else if (n === 'v-bind:style' || n=== ':style') {
+                    elvar = { tp: 'bind:style', el: el, var: v, forElVar: forElVar, data: data };
+                    lstElVar.push(elvar);
+                }
+                else if (n === 'v-bind:class' || n === ':class') {
+                    elvar = { tp: 'bind:class', el: el, var: v, forElVar: forElVar, data: data };
+                    lstElVar.push(elvar);
+                }
+                else if (n.indexOf('v-bind:') === 0 || n.indexOf(':') === 0) {
+                    var a = n.split(':')[1];
+                    elvar = { tp: 'bind:' + a, el: el, var: v, forElVar: forElVar, data: data };
+                    lstElVar.push(elvar);
+                } 
+                else if (n === 'v-on:change') {
+                    var vv = v.split('(');
+                    vv = vv[0];
+                    if (ww.methods && ww.methods[vv])
+                        md = ww.methods[vv];
+
+                    elvar = { tp: 'on:change', el: el, var: v, forElVar: forElVar, data: data }
+                    lstElVar.push(elvar);
+                }
+                else if (n.indexOf('v-on:') === 0) {
+                    var origEvt = n.split(':')[1];
+                    var vv = v.split('(');
+                    vv = vv[0];
+                    if (ww.methods && ww.methods[vv]) {
+                        var method = ww.methods[vv];
+                        el['on' + origEvt] = function (evt) {
+                            if (method) {
+                                method(data);
+                            }
+                        };
+                        elvar = { tp: 'on:' + origEvt, el: el, var: v, forElVar: forElVar, data: data }
+                        lstElVar.push(elvar);
+                    } else {
+                        throw Error('method ' + vv + ' not exist');
+                    }
+                   
+                }
+            }
+    
+            if (modelVar || md) {
+                el.onchange = function (evt) { 
+                    if (modelVar) {
+                        if (modelVar.indexOf('.') === -1) {
+                            ww.data[modelVar] = el.value;
+                        }
+                        else {
+                            modelVar = modelVar.split('.')[1];
+                            data[modelVar] = el.value;
+                        }
+                    }
+                    if (md) {
+                        md(data);
+                    }
+                };
+            } 
+        } 
+
+        if (!el.children || el.children.length === 0) {
+            if (!el.children) {
+                var iiii = 1;
+            }
+            if (el.innerText && el.innerHTML.indexOf('<') === -1 && el.innerText.indexOf('{{') >= 0) {
+                lstElVar.push({ tp: 'innerText', el: el, innerText: el.innerText, forElVar: forElVar, data: data });
+            }
+        }
+        else {
+            for (var i = 0; i < el.children.length; i++) {
+                if (!el.children[i].innerText) {
+                    //  debugger;
+                }
+                bindElVars(el.children[i], data, g_lstElVar, null);
+            }
+        }
+        if (bCurrentIsFor) {
+            forElVar = forElVar.mumFor;
+        }
+    }
+    bindElVars(ww.el, ww.data, g_lstElVar, null);
 
     function updateElByVar(dataObj, pn, pv) { 
         for (var i in g_lstElVar) {
@@ -211,10 +338,7 @@ function WildWood(ww) {
                     } 
                 }
                 else ev.el.value = pv;
-            }
-            else if (ev.tp === 'bind:value' && ev.var === varName) {
-                  ev.el.value = pv;
-            }
+            } 
             else if (ev.tp === 'innerText' && ev.innerText.indexOf(varName) >= 0) { 
                 ev.el.innerText =  ev.innerText.fillVars(dataObj, objName);
             }
@@ -225,6 +349,9 @@ function WildWood(ww) {
                 var bShow = evil("with(varObj){return " + ev.var + "}", 'varObj', ww.data, objName, dataObj); 
                 if (bShow) ev.el.style.display = ev.origDisplay;
                 else ev.el.style.display = "none";
+            }
+            else if (ev.tp === 'bind:value' && ev.var === varName) {
+                ev.el.value = pv;
             }
             else if (ev.tp === 'bind:style') {
                 if (ev.var.indexOf(varName) >= 0) {
@@ -265,6 +392,10 @@ function WildWood(ww) {
                         ev.el.className.remove(n);
                     }
                 }
+            }
+            else if (ev.tp.indexOf('bind:') === 0 && ev.var === varName) {
+                var attr = ev.tp.split(':')[1];
+                ev.el.setAttribute(attr,pv);
             }
             else if (ev.tp === 'for') { 
                 if (ev.inVar === varName && !ev.tmpFor) {
