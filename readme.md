@@ -1,7 +1,7 @@
-someone may ask: so many successful products is there, vue and angular is perfect. why make this one?
+you may ask: so many successful similar products are there, vue and angular are perfect. why make this one?
 # it is simple, it is smaller, and it is faster. So it is here.
 Other similar component usually replace the whole dom object when loading. So they will remove the event handlers and user defined variables on doms. So they may have problems with some UI components. The templete synax is almost same as vue.
-
+ 
 Following is a simple demo for sale. It calculate the cash amount by total amount and coupon amount
 
 for exmaple. The data defined is 
