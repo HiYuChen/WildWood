@@ -23,10 +23,10 @@ function findNodes(el, slt) {
 }
 */
 function WildWood(ww) {
-    this.ww = ww;  
+    this.ww = ww;     
     function insertAfter(newEle, targetEle) { 
         var parent = targetEle.parentNode; 
-        if (parent.lastChild == targetEle) {   
+        if ( parent.lastChild == targetEle  ) {   
             parent.appendChild(newEle);
         } else {   
             parent.insertBefore(newEle, targetEle.nextSibling);
@@ -108,6 +108,7 @@ function WildWood(ww) {
     function evil(code, argName1, argValue1, argName2, argValue2) {
         code = code.replace(new RegExp('&gt;', "g"), '>');
         code = code.replace(new RegExp('&lt;', "g"), '<'); 
+        code = code.replace(new RegExp('&amp;', "g"), '&'); 
         //var fn = Function;
         if (!argName1) argName1 = undefined;//for tencent x5 browser '' is invalid
         if (!argName2) argName2 = undefined; 
@@ -180,9 +181,11 @@ function WildWood(ww) {
                 }
                 else if (n.indexOf('v-bind:') === 0 || n.indexOf(':') === 0) {
                     var a = n.split(':')[1];
+                    //if (a === 'disabled')
+                      //  debugger;
                     elvar = { tp: 'bind:' + a, el: el, var: v, forElVar: forElVar, data: data };
                     lstElVar.push(elvar);
-                } 
+                }
                 else if (n === 'v-on:change') {
                     var vv = v.split('(');
                     vv = vv[0];
@@ -215,12 +218,15 @@ function WildWood(ww) {
             if (modelVar || md) {
                 el.onchange = function (evt) { 
                     if (modelVar) {
+                        var val = el.value;
+                        if (el.type==='checkbox') val = el.checked;
+                 
                         if (modelVar.indexOf('.') === -1) {
-                            ww.data[modelVar] = el.value;
+                            ww.data[modelVar] = val;
                         }
                         else {
-                            modelVar = modelVar.split('.')[1];
-                            data[modelVar] = el.value;
+                            var modelVar1 = modelVar.split('.')[1];
+                            data[modelVar1] = val;
                         }
                     }
                     if (md) {
@@ -252,16 +258,19 @@ function WildWood(ww) {
     bindElVars(ww.el, ww.data, g_lstElVar, null);
 
     function updateElByVar(dataObj, pn, pv, bIgnoreFor) { 
-        for (var i in g_lstElVar) {
+        var dataObjOrig = dataObj;
+        var arrRemoveEv = [];
+        var len = g_lstElVar.length;
+        for (var i = 0; i < len;i++) {
             var ev = g_lstElVar[i]; 
-
+            dataObj = dataObjOrig;
             var objName = '';
             var varName = pn;
             if (ev.innerHTML && ev.innerHTML.indexOf(pn) >= 0 && pn.indexOf('m_docTitle')>=0) {
               // debugger;
             }
-            if (ev.var && ev.var.indexOf(pn) >= 0 && pn.indexOf('praised_comment') >= 0) {
-             //   debugger;
+            if (ev.var && ev.var.indexOf(pn) >= 0 && pn.indexOf('m_bankSearch') >= 0) {
+               // debugger;
             }
             if (dataObj !== ww.data) {
                 if(ev.data !== dataObj )  
@@ -282,18 +291,21 @@ function WildWood(ww) {
             }
             if (ev.forElVar || ev.tp=='for') { 
                 dataObj = ev.data;
-                if (ev.forElVar) objName = ev.forElVar.forVar;
-              //  if (ev.tp == 'for')
-              //      objName = ev.forVar;
-              //  else objName = ev.forElVar.forVar;
+                if (ev.forElVar ) {
+                    objName = ev.forElVar.forVar;
+                    if (dataObjOrig !== ww.data)
+                        varName = objName + '.' + varName;
+                }  
             }
-            if (objName)
-                varName = objName + '.' + varName;
+            
             if (ev.tp === 'model' && ev.var === varName) {
                 if (ev.el.type === 'radio') {
                     if (ev.el.value === pv) {
                         ev.el.checked = true;
                     }
+                }
+                else if (ev.el.type === 'checkbox') {
+                    ev.el.checked = pv; 
                 }
                 else if (ev.el.tagName === 'DIV') {
                     ev.el.innerHTML = pv; 
@@ -362,16 +374,32 @@ function WildWood(ww) {
                     }
                 }
             }
-            else if (ev.tp.indexOf('bind:') === 0 && ev.var === varName) {
+            else if (ev.tp.indexOf('bind:') === 0 && ev.var.indexOf(varName)>=0) {
                 var attr = ev.tp.split(':')[1];
+               // if (attr.indexOf('disabled') >= 0) {
+                  //  debugger;
+               // }
                 var attrV = evil("with(varObj){return " + ev.var + "}", 'varObj', ww.data, objName, dataObj); 
-                ev.el.setAttribute(attr, attrV);
+                if (attrV)  
+                    ev.el.setAttribute(attr, attrV);
+                else ev.el.removeAttribute(attr);
             }
             else if (ev.tp === 'for' && !bIgnoreFor) { 
                 if ((ev.inVar === varName || (ev.mumFor && ev.inVar === ev.mumFor.forVar + '.' + varName)) && !ev.tmpFor) {
                     //if this is a template v-for block and match the for variable
                     var arr = dataObj[pn];
                     var forHtml = '';
+                    ev.lastEl = ev.el;
+                    for (var j = g_lstElVar.length - 1; j >= 0; j--) {//delete exist ev and element
+                          var ev1 = g_lstElVar[j];
+                        if ((ev1.inVar === varName || (ev1.mumFor && ev1.inVar === ev1.mumFor.forVar + '.' + varName)) && ev1.tmpFor && ev1.data == dataObj) {
+                              if (ev1.el.parentNode) {
+                                 ev1.el.parentNode.removeChild(ev1.el);
+                              }
+                              arrRemoveEv.push(j);
+                          }
+                    }
+
                     //ev.mumEl.innerHTML = "";  
                     for (var k in arr) {
                         var row = arr[k]; 
@@ -384,17 +412,20 @@ function WildWood(ww) {
                         insertAfter(m, ev.lastEl);
                         bindElVars(m, row, g_lstElVar, ev);
                         ev.lastEl = m;
-
                        // observeArray(dataObj, arr, pn, row);
                         
                     }
                     observeArray(dataObj, arr, pn);
-                }
+                    }
+                   
                 //ev.mumEl.innerHTML = forHtml;
             }
         }
+        arrRemoveEv.forEach(function (v) {
+            g_lstElVar.splice(v, 1);
+        });
     } 
-    function updateListByVar(dataObj,arrName, method, param,param2) {
+    function updateListByVar(dataObj,arrName, method, param,param2,param3) {
         var row;
         for (var i in g_lstElVar) {
             var ev = g_lstElVar[i];
@@ -409,12 +440,15 @@ function WildWood(ww) {
                 }
                 else continue;
                 var arr = dataObj[arrName];
-                if ((method === 'push' || method === 'unshift') && !ev.tmpFor) {
+                if ((method === 'push' || method === 'unshift' || method === 'insert') && !ev.tmpFor) {
                     row = param;
                     var m = ev.outerHTML;  
                     m = createNode(m); 
                     if (method === 'push') {
                         insertAfter(m, ev.lastEl);
+                    }
+                    else if (method === 'insert') {
+                        insertAfter(m, param2);
                     }
                     else {
                         insertAfter(m, ev.el);
@@ -425,15 +459,13 @@ function WildWood(ww) {
                     observeArray(dataObj, arr, arrName, row);//observe this row
                 } 
                 else if (method == 'splice' || method == 'pop') {
-                    if (!ev.tmpFor) {
-
+                    if (!ev.tmpFor) { 
                         param2.forEach(function (node) {
                             for (var j = g_lstElVar.length - 1;j >= 0; j--) {
                                 var c = g_lstElVar[j];
-                                if (c.data === node || (c.forElVar && c.forElVar.mumFor && c.forElVar.mumFor.data===node)) {
-                                    //debugger;
-                                    g_lstElVar.splice(j, 1); 
-                                }
+                                if (c.data === node || (c.forElVar && c.forElVar.mumFor && c.forElVar.mumFor.data===node)) { 
+                                      g_lstElVar.splice(j, 1); 
+                                } 
                                 if (c.data === node) {
                                     if (c.tp === 'for' && c.tmpFor) { 
                                         $(c.el).animate({ height: '0px' }, {
@@ -609,8 +641,30 @@ function WildWood(ww) {
                             for (var j = start; j < start + num; j++) {
                                 removedNodes.push(this[j]);
                             }
-                            result = originalProto[method].apply(this, arguments);
-                            updateListByVar(dataObj, arrName, method, null, removedNodes);
+                            
+                            var insertNode = null; var elInsertIndex = 0;
+                            if (arguments.length >= 3) {
+                                insertNode = arguments[2];
+
+                                var startEl = this[start];
+                                for (var j = g_lstElVar.length - 1; j >= 0; j--) {
+                                    var c = g_lstElVar[j];
+                                    if (c.data === startEl && c.tp === 'for' && c.tmpFor) {
+                                        elInsertIndex = j;
+                                        if (num == 0) elInsertIndex = j;
+                                        break;
+                                    }
+                                }
+                                result = originalProto[method].apply(this, arguments);
+                                updateListByVar(dataObj, arrName, "insert", insertNode, g_lstElVar[elInsertIndex].el);
+                            }
+                            else {
+                                result = originalProto[method].apply(this, arguments); 
+                            }
+                           
+                            if (removedNodes)
+                                updateListByVar(dataObj, arrName, method, null, removedNodes);
+                           
                         }
                         else {
                             result = originalProto[method].apply(this, arguments);

@@ -49,7 +49,7 @@ v-on:click="rowClicked(row)" ;
 v-on:any other event
 ```
 
-#Limitation
+# Limitation
 
  1. {{}} should be used in the innerText on a html element. It is better has no child
     
